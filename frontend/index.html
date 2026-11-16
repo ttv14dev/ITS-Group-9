@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trung tâm nhận diện phương tiện ưu tiên | ITS Group 9</title>
+  <meta name="description" content="Demo nhận diện phương tiện ưu tiên: xe cứu thương, xe cứu hỏa, xe công an.">
+  <meta name="color-scheme" content="dark">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Bỏ qua đến nội dung chính</a>
+
+  <!-- ===== Thanh tiêu đề ===== -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <div>
+          <p class="brand__kicker">ITS Group 9 · Control Room</p>
+          <h1 class="brand__title">Nhận diện phương tiện ưu tiên</h1>
+        </div>
+      </div>
+      <div class="clock" aria-label="Thời gian hiện tại">
+        <time id="clock" class="clock__time">--:--:--</time>
+        <span id="clock-date" class="clock__date">--/--/----</span>
+      </div>
+    </div>
+    <div class="hazard-band" aria-hidden="true"></div>
+  </header>
+
+  <main id="main" class="dashboard">
+
+    <!-- ===== Cột trái: màn hình + điều khiển ===== -->
+    <div class="workspace">
+
+      <!-- Màn hình hiển thị (Thành viên 4 vẽ khung tải ảnh/xem trước vào #upload-root) -->
+      <section class="stage" aria-label="Màn hình nhận diện">
+        <div class="stage__tag"><span class="dot" aria-hidden="true"></span>Nguồn: <span id="stage-source">Chưa có</span></div>
+        <i class="corner corner--tl" aria-hidden="true"></i>
+        <i class="corner corner--tr" aria-hidden="true"></i>
+        <i class="corner corner--bl" aria-hidden="true"></i>
+        <i class="corner corner--br" aria-hidden="true"></i>
+
+        <div id="upload-root" class="stage__body">
+          <!-- Thành viên 4: khung kéo thả, ảnh xem trước, trạng thái xử lý (js/upload.js) -->
+          <div class="stage__hint">
+            <p class="stage__hint-title">Chưa có hình ảnh</p>
+            <p>Tải ảnh phương tiện lên hoặc chọn loại xe bên dưới để bắt đầu.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Nút điều khiển -->
+      <div class="toolbar" role="group" aria-label="Điều khiển">
+        <button id="btn-load" class="btn btn--primary" type="button">Tải ảnh</button>
+        <button id="btn-stream" class="btn btn--primary" type="button" disabled
+                title="Hướng phát triển: chưa có trong phạm vi demo">Mở luồng video <small>Sắp có</small></button>
+        <button id="btn-start" class="btn btn--go" type="button">Nhận diện ảnh</button>
+        <button id="btn-reset" class="btn btn--stop" type="button">Đặt lại</button>
+      </div>
+
+      <!-- Nhận diện theo loại xe (Thành viên 3) -->
+      <section class="card" aria-labelledby="type-title">
+        <h2 id="type-title" class="card__title">Nhận diện theo loại xe</h2>
+        <form id="type-form" class="type-form" novalidate>
+          <fieldset class="choices">
+            <legend class="visually-hidden">Loại phương tiện</legend>
+            <!-- value phải khớp danh sách vehicle_type của backend -->
+            <label class="choice"><input type="radio" name="vehicle_type" value="ambulance" required><span class="choice__body">Xe cứu thương</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="fire_truck"><span class="choice__body">Xe cứu hỏa</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="police"><span class="choice__body">Xe công an</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="car"><span class="choice__body">Xe con</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="truck"><span class="choice__body">Xe tải</span></label>
+          </fieldset>
+          <button id="type-submit" class="btn btn--accent" type="submit">Nhận diện</button>
+        </form>
+        <p id="type-error" class="form-error" role="alert" hidden></p>
+      </section>
+
+      <!-- Thanh trạng thái -->
+      <div class="statusbar" aria-label="Thông số hệ thống">
+        <span>Độ trễ: <b id="stat-latency">– ms</b></span>
+        <span>Đối tượng: <b id="stat-objects">0</b></span>
+        <span>Cảnh báo: <b id="stat-alerts">0</b></span>
+        <span>Nguồn: <b id="stat-source">Chưa có</b></span>
+      </div>
+    </div>
+
+    <!-- ===== Cột phải: trạng thái, thông tin, lịch sử ===== -->
+    <aside id="result" class="sidebar" data-state="empty" aria-label="Kết quả nhận diện">
+
+      <section class="card">
+        <h2 class="card__title">Trạng thái hệ thống</h2>
+        <div id="result-status" class="status-badge" role="status" aria-live="polite">Sẵn sàng</div>
+        <p id="result-loading" class="note" hidden>Đang nhận diện…</p>
+        <p id="result-error" class="form-error" role="alert" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Thông tin nhận diện</h2>
+        <dl class="info">
+          <div><dt>Loại xe</dt><dd id="result-type">—</dd></div>
+          <div><dt>Độ tin cậy</dt><dd id="result-confidence">—</dd></div>
+        </dl>
+        <div class="meter" aria-hidden="true"><span id="result-meter"></span></div>
+      </section>
+
+      <section class="card card--grow">
+        <h2 class="card__title">Lịch sử cảnh báo</h2>
+        <ul id="history-list" class="history">
+          <li class="history__empty">Chưa có cảnh báo nào.</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <p>Dự án demo cho tiểu luận môn Hệ thống Giao thông Thông minh</p>
+  </footer>
+
+  <script src="js/clock.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <!-- <script src="js/upload.js" defer></script>  (Thành viên 4 mở dòng này khi có file) -->
+</body>
+</html>
