@@ -3,8 +3,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from backend.app.services.image_upload import validate_image
-from backend.app.ml.vehicle_detector import VehicleDetector
+from app.services.image_upload import validate_image
+from app.ml.vehicle_detector import VehicleDetector
 
 
 router = APIRouter()

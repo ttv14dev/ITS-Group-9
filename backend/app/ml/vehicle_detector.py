@@ -25,7 +25,9 @@ class VehicleDetector:
         path = Path(image_path)
 
         if not path.is_file():
-            raise FileNotFoundError(f"Không tìm thấy ảnh: {image_path}")
+            raise FileNotFoundError(
+                f"Không tìm thấy ảnh: {image_path}"
+            )
 
         self.load_model()
 
@@ -38,10 +40,19 @@ class VehicleDetector:
         detections = []
 
         for result in results:
+            print("YOLO CLASSES:", result.names)
+            print("SO LUONG XE PHAT HIEN:", len(result.boxes))
+
             for box in result.boxes:
                 class_id = int(box.cls[0])
                 confidence = float(box.conf[0])
                 vehicle_type = result.names[class_id]
+
+                print(
+                    "CLASS ID:", class_id,
+                    "CONFIDENCE:", confidence,
+                    "NAME:", vehicle_type
+                )
 
                 if vehicle_type in self.vehicle_classes:
                     detections.append({
@@ -64,5 +75,8 @@ class VehicleDetector:
         return {
             "is_priority": False,
             "vehicle_type": best_detection["vehicle_type"],
-            "confidence": round(best_detection["confidence"], 4)
+            "confidence": round(
+                best_detection["confidence"], 4
+            )
         }
+        
