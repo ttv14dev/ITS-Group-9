@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITS - Tải ảnh phương tiện ưu tiên</title>
+</head>
+<body>
+
+    <h1>NHẬN DIỆN PHƯƠNG TIỆN ƯU TIÊN</h1>
+
+    <p>Chọn ảnh phương tiện từ máy tính để tải lên hệ thống.</p>
+
+    <!-- Khu vực tải ảnh -->
+    <div id="dropArea"
+         style="border: 2px dashed #3498db;
+                padding: 30px;
+                text-align: center;
+                border-radius: 10px;
+                margin: 20px 0;">
+
+        <h3>Kéo thả ảnh vào đây</h3>
+        <p>Hoặc chọn ảnh từ máy tính</p>
+
+        <input type="file" id="imageInput" accept="image/*">
+
+    </div>
+
+    <!-- Khu vực xem trước -->
+    <div>
+        <h3>Ảnh xem trước:</h3>
+
+        <img id="imagePreview"
+             alt="Ảnh phương tiện xem trước"
+             width="350"
+             style="display: none;">
+
+        <p id="uploadStatus"></p>
+
+        <button id="clearButton" type="button">
+            Xóa ảnh
+        </button>
+    </div>
+
+    <script src="js/upload.js"></script>
+
+</body>
+</html>
