@@ -20,7 +20,7 @@ def test_invalid_image_content():
 
 def test_valid_jpeg():
     content = b"\xff\xd8\xff" + b"test"
-    assert validate_image("test.jpg", content) is Truepython -m pytest tests/unit/test_image_upload.py -v
+    assert validate_image("test.jpg", content) is True
 
 
 def test_image_exceeds_max_size():
