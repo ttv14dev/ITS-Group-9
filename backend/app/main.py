@@ -10,9 +10,10 @@ app = FastAPI(
 # Kết nối API nhận diện phương tiện
 app.include_router(
     image_router,
-    prefix="/detection",
+    prefix="/api/detect",
     tags=["Detection"]
 )
+
 
 @app.get("/")
 def home():

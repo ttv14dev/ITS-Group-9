@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 
@@ -11,7 +12,9 @@ router = APIRouter()
 
 detector = VehicleDetector()
 
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+# Đường dẫn đến ITS-Group-9-New/storage/uploads
+UPLOAD_DIR = Path(__file__).resolve().parents[4] / "storage" / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.post("/image")
@@ -19,42 +22,46 @@ async def detect_image(file: UploadFile = File(...)):
     temp_path = None
 
     try:
-        filename = file.filename or ""
-        extension = Path(filename).suffix.lower()
-
-        if extension not in ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=400,
-                detail="Định dạng ảnh không được hỗ trợ"
-            )
-
+        # Đọc nội dung ảnh
         content = await file.read()
 
-        try:
-            validate_image(filename, content)
-        except ValueError as error:
-            raise HTTPException(status_code=400, detail=str(error))
+        # Kiểm tra định dạng, kích thước và nội dung ảnh
+        extension = validate_image(file.filename, content)
 
+        # Tạo file tạm trong storage/uploads
         with tempfile.NamedTemporaryFile(
+            mode="wb",
             suffix=extension,
+            prefix="upload_",
+            dir=UPLOAD_DIR,
             delete=False
         ) as temp_file:
             temp_file.write(content)
             temp_path = temp_file.name
 
+        # Nhận diện phương tiện
         result = detector.detect(temp_path)
 
         return result
 
     except HTTPException:
         raise
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
     except Exception as error:
         raise HTTPException(
             status_code=500,
-            detail=f"Lỗi xử lý ảnh: {str(error)}"
+            detail=f"Image detection failed: {str(error)}"
         )
+
     finally:
         await file.close()
 
-        if temp_path and Path(temp_path).exists():
-            Path(temp_path).unlink()
+        # Xóa ảnh tạm sau khi xử lý
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
