@@ -46,13 +46,40 @@
         <i class="corner corner--bl" aria-hidden="true"></i>
         <i class="corner corner--br" aria-hidden="true"></i>
 
-        <div id="upload-root" class="stage__body">
-          <!-- Thành viên 4: khung kéo thả, ảnh xem trước, trạng thái xử lý (js/upload.js) -->
-          <div class="stage__hint">
+        
+<div id="upload-root" class="stage__body">
+    <div id="dropArea">
+
+        <input
+            type="file"
+            id="imageInput"
+            accept=".jpg,.jpeg,.png"
+            hidden
+        >
+
+        <div class="stage__hint">
             <p class="stage__hint-title">Chưa có hình ảnh</p>
-            <p>Tải ảnh phương tiện lên hoặc chọn loại xe bên dưới để bắt đầu.</p>
-          </div>
+            <p>Kéo thả ảnh vào đây hoặc nhấn nút Tải ảnh.</p>
+            <p>Hỗ trợ JPG, JPEG, PNG - Tối đa 5MB.</p>
         </div>
+
+        <img
+            id="imagePreview"
+            alt="Ảnh phương tiện xem trước"
+            style="display: none;"
+        >
+
+        <p id="uploadStatus" role="status" aria-live="polite">
+            Chưa có ảnh được chọn.
+        </p>
+
+        <button type="button" id="clearButton">
+            Xóa ảnh
+        </button>
+
+    </div>
+</div>
+
       </section>
 
       <!-- Nút điều khiển -->
@@ -124,7 +151,6 @@
   </footer>
 
   <script src="js/clock.js" defer></script>
-  <script src="js/api.js" defer></script>
-  <!-- <script src="js/upload.js" defer></script>  (Thành viên 4 mở dòng này khi có file) -->
+  <script src="js/upload.js" defer></script>
 </body>
 </html>
