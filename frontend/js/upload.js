@@ -22,12 +22,13 @@ function handleImage(file) {
     // Chỉ chấp nhận JPG, JPEG và PNG
     const allowedTypes = [
         "image/jpeg",
-        "image/png"
+        "image/png",
+        "image/webp"
     ];
 
     if (!allowedTypes.includes(file.type)) {
         uploadStatus.textContent =
-            "Vui lòng chọn ảnh JPG, JPEG hoặc PNG!";
+            "Vui lòng chọn ảnh JPG, PNG hoặc WEBP!";
         return;
     }
 
@@ -44,6 +45,7 @@ function handleImage(file) {
 
     // Tạo ảnh xem trước mới
     currentImageURL = URL.createObjectURL(file);
+    window.selectedFile = file; // api.js dùng file này để gửi lên máy chủ
 
     imagePreview.src = currentImageURL;
     imagePreview.style.display = "block";
@@ -90,6 +92,7 @@ clearButton.addEventListener("click", function () {
     imagePreview.style.display = "none";
 
     imageInput.value = "";
+    window.selectedFile = null;
 
     if (currentImageURL) {
         URL.revokeObjectURL(currentImageURL);

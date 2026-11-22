@@ -99,10 +99,12 @@
             <legend class="visually-hidden">Loại phương tiện</legend>
             <!-- value phải khớp danh sách vehicle_type của backend -->
             <label class="choice"><input type="radio" name="vehicle_type" value="ambulance" required><span class="choice__body">Xe cứu thương</span></label>
-            <label class="choice"><input type="radio" name="vehicle_type" value="fire_truck"><span class="choice__body">Xe cứu hỏa</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="firetruck"><span class="choice__body">Xe cứu hỏa</span></label>
             <label class="choice"><input type="radio" name="vehicle_type" value="police"><span class="choice__body">Xe công an</span></label>
             <label class="choice"><input type="radio" name="vehicle_type" value="car"><span class="choice__body">Xe con</span></label>
             <label class="choice"><input type="radio" name="vehicle_type" value="truck"><span class="choice__body">Xe tải</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="bus"><span class="choice__body">Xe buýt</span></label>
+            <label class="choice"><input type="radio" name="vehicle_type" value="motorbike"><span class="choice__body">Xe máy</span></label>
           </fieldset>
           <button id="type-submit" class="btn btn--accent" type="submit">Nhận diện</button>
         </form>
@@ -152,5 +154,6 @@
 
   <script src="js/clock.js" defer></script>
   <script src="js/upload.js" defer></script>
+  <script src="js/api.js" defer></script>
 </body>
 </html>
