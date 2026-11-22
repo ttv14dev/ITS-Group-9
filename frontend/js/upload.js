@@ -17,11 +17,18 @@ function handleImage(file) {
 
     if (!file) return;
 
-    // Kiểm tra định dạng
-    if (!file.type.startsWith("image/")) {
-        uploadStatus.textContent = "Vui lòng chọn file hình ảnh!";
-        return;
-    }
+    
+    // Chỉ chấp nhận JPG, JPEG và PNG
+const allowedTypes = [
+    "image/jpeg",
+    "image/png"
+];
+
+if (!allowedTypes.includes(file.type)) {
+    uploadStatus.textContent =
+        "Vui lòng chọn ảnh JPG, JPEG hoặc PNG!";
+    return;
+}
 
     // Kiểm tra dung lượng
     if (file.size > MAX_FILE_SIZE) {
