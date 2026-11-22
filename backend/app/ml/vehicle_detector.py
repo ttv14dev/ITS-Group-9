@@ -1,38 +1,40 @@
-from pathlib import Path
+import os
 from ultralytics import YOLO
 
 
 class VehicleDetector:
-    def __init__(self, model_path="yolov8n.pt", confidence_threshold=0.25):
+    def __init__(self, model_path="yolov8n.pt", confidence_threshold=0.5):
         self.model_path = model_path
         self.confidence_threshold = confidence_threshold
         self.model = None
 
         self.vehicle_classes = {
-            "car",
-            "motorcycle",
-            "bus",
-            "truck"
+            "car": "car",
+            "motorcycle": "motorcycle",
+            "bus": "bus",
+            "truck": "truck"
         }
 
     def load_model(self):
-        """Tải model YOLO."""
-        if self.model is None:
-            self.model = YOLO(self.model_path)
-
-    def detect(self, image_path: str):
-        """Nhận diện phương tiện trong ảnh."""
-        path = Path(image_path)
-
-        if not path.is_file():
+        if not os.path.exists(self.model_path):
             raise FileNotFoundError(
-                f"Không tìm thấy ảnh: {image_path}"
+                f"Model not found: {self.model_path}"
             )
 
-        self.load_model()
+        self.model = YOLO(self.model_path)
+        return True
+
+    def detect(self, image_path):
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(
+                f"Image not found: {image_path}"
+            )
+
+        if self.model is None:
+            self.load_model()
 
         results = self.model.predict(
-            source=str(path),
+            source=image_path,
             conf=self.confidence_threshold,
             verbose=False
         )
@@ -40,23 +42,17 @@ class VehicleDetector:
         detections = []
 
         for result in results:
-            print("YOLO CLASSES:", result.names)
-            print("SO LUONG XE PHAT HIEN:", len(result.boxes))
+            if result.boxes is None:
+                continue
 
             for box in result.boxes:
                 class_id = int(box.cls[0])
                 confidence = float(box.conf[0])
-                vehicle_type = result.names[class_id]
+                class_name = self.model.names[class_id]
 
-                print(
-                    "CLASS ID:", class_id,
-                    "CONFIDENCE:", confidence,
-                    "NAME:", vehicle_type
-                )
-
-                if vehicle_type in self.vehicle_classes:
+                if class_name in self.vehicle_classes:
                     detections.append({
-                        "vehicle_type": vehicle_type,
+                        "vehicle_type": self.vehicle_classes[class_name],
                         "confidence": confidence
                     })
 
@@ -75,8 +71,5 @@ class VehicleDetector:
         return {
             "is_priority": False,
             "vehicle_type": best_detection["vehicle_type"],
-            "confidence": round(
-                best_detection["confidence"], 4
-            )
+            "confidence": round(best_detection["confidence"], 4)
         }
-        
