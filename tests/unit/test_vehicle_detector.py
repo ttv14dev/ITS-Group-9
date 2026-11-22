@@ -1,4 +1,6 @@
 import pytest
+
+pytest.importorskip("ultralytics", reason="Chưa cài ultralytics (YOLO)")
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 

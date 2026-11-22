@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pillow
+pytest
+httpx
+# Chỉ cần nếu dùng backend/app/ml/vehicle_detector.py (YOLO):
+# ultralytics
