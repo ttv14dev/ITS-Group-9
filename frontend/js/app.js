@@ -1,4 +1,5 @@
 // Giao diện nhận diện phương tiện ưu tiên: chọn ảnh/video, gọi API, hiển thị kết quả.
+// Phần "Dashboard:" là phần thêm cho giao diện tối (trạng thái, thông số, lịch sử).
 (function () {
   "use strict";
   const $ = (id) => document.getElementById(id);
@@ -7,17 +8,53 @@
   const MAX_VIDEO = 50 * 1024 * 1024;
   const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const VIDEO_EXT = [".mp4", ".avi", ".mov", ".mkv", ".webm"];
+  const MAX_HISTORY = 50;
+
+  // Dashboard: mở bằng Live Server (cổng 5500) hoặc file:// thì gọi thẳng backend
+  const API_BASE =
+    location.protocol === "file:" || location.port === "5500" || location.port === "5501"
+      ? "http://127.0.0.1:8000"
+      : "";
 
   const input = $("file-input");
   const dropArea = $("drop-area");
   let file = null;      // file đang chọn
   let kind = null;      // "image" | "video"
   let previewUrl = null;
+  let alerts = 0;       // Dashboard: số lần phát hiện xe ưu tiên
 
   const fmtMB = (n) => (n / 1024 / 1024).toFixed(1) + " MB";
   const show = (el, on) => { el.hidden = !on; };
   const extOf = (name) => (name.lastIndexOf(".") >= 0 ? name.slice(name.lastIndexOf(".")).toLowerCase() : "");
 
+  // ---------- Dashboard: trạng thái, thông số, lịch sử ----------
+  function setBadge(state, text) { // state: idle | loading | priority | none | error
+    const banner = $("banner");
+    banner.className = "banner banner--" + state;
+    banner.textContent = text;
+  }
+
+  function setSource(text) {
+    $("stage-source").textContent = text;
+    $("stat-source").textContent = text;
+  }
+
+  function addHistory(data) {
+    const empty = $("history-list").querySelector(".history__empty");
+    if (empty) empty.remove();
+    const li = document.createElement("li");
+    li.textContent = "[" + new Date().toLocaleTimeString("vi-VN") + "] " + data.label_vi + " - " + (file ? file.name : "");
+    $("history-list").prepend(li);
+    while ($("history-list").children.length > MAX_HISTORY) $("history-list").lastElementChild.remove();
+  }
+
+  $("btn-original").addEventListener("click", function () {
+    const box = $("annotated-box");
+    box.hidden = !box.hidden;
+    this.textContent = box.hidden ? "Xem ảnh đã đánh dấu" : "Xem ảnh gốc";
+  });
+
+  // ---------- Chọn file ----------
   function setFileError(msg) {
     $("file-error").textContent = msg || "";
     show($("file-error"), !!msg);
@@ -28,6 +65,11 @@
     show($("result-error"), false);
     show($("result-loading"), false);
     show($("result-empty"), true);
+    show($("annotated-box"), false);
+    show($("btn-original"), false);
+    setBadge("idle", "Sẵn sàng");
+    $("stat-objects").textContent = "0";
+    $("stat-latency").textContent = "– ms";
   }
 
   function clearFile() {
@@ -41,6 +83,7 @@
     setFileError("");
     $("btn-detect").disabled = true;
     $("btn-clear").disabled = true;
+    setSource("Chưa có");
     resetResult();
   }
 
@@ -73,6 +116,7 @@
     show($("file-info"), true);
     $("btn-detect").disabled = false;
     $("btn-clear").disabled = false;
+    setSource(f.name);
     resetResult();
   }
 
@@ -86,7 +130,10 @@
   function setLoading(on, text) {
     show($("result-loading"), on);
     if (text) $("loading-text").textContent = text;
-    if (on) { show($("result-empty"), false); show($("result"), false); show($("result-error"), false); }
+    if (on) {
+      show($("result-empty"), false); show($("result"), false); show($("result-error"), false);
+      setBadge("loading", "Đang phân tích…");
+    }
     $("btn-detect").disabled = on || !file;
   }
 
@@ -95,15 +142,15 @@
     show($("result"), false);
     $("result-error").textContent = msg;
     show($("result-error"), true);
+    setBadge("error", "Có lỗi");
   }
 
   function render(data) {
     show($("result-empty"), false);
     show($("result-error"), false);
 
-    const banner = $("banner");
-    if (data.is_priority) { banner.className = "banner banner--priority"; banner.textContent = "PHƯƠNG TIỆN ƯU TIÊN: " + data.label_vi; }
-    else { banner.className = "banner banner--none"; banner.textContent = data.label_vi || "Không phát hiện xe ưu tiên"; }
+    if (data.is_priority) setBadge("priority", "PHƯƠNG TIỆN ƯU TIÊN: " + data.label_vi);
+    else setBadge("none", data.label_vi || "Không phát hiện xe ưu tiên");
 
     $("result-message").textContent = data.message || "";
     $("r-type").textContent = data.vehicle_type ? data.label_vi : "-";
@@ -128,10 +175,12 @@
       });
     }
 
-    // Ảnh đã đánh dấu
+    // Ảnh đã đánh dấu: phủ lên màn hình, có nút chuyển về ảnh gốc
     const hasImg = !!data.annotated_image;
     show($("annotated-box"), hasImg);
+    show($("btn-original"), hasImg);
     if (hasImg) {
+      $("btn-original").textContent = "Xem ảnh gốc";
       $("annotated").src = data.annotated_image;
       $("annotated-caption").textContent = (v ? "Khung hình tiêu biểu của video. " : "") + "Khung đỏ: xe ưu tiên do mô hình phát hiện.";
     }
@@ -158,22 +207,33 @@
       list.appendChild(li);
     });
 
+    // Dashboard: thông số và lịch sử
+    $("stat-objects").textContent = String(dets.length);
+    if (data.is_priority) {
+      alerts += 1;
+      $("stat-alerts").textContent = String(alerts);
+      addHistory(data);
+    }
+
     show($("result"), true);
   }
 
   async function post(url, options, loadingText) {
     setLoading(true, loadingText);
+    const started = performance.now();
     try {
-      const res = await fetch(url, options);
+      const res = await fetch(API_BASE + url, options);
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const detail = typeof body.detail === "string" ? body.detail : "Yêu cầu không hợp lệ (mã " + res.status + ").";
+        let detail = typeof body.detail === "string" ? body.detail : "Yêu cầu không hợp lệ (mã " + res.status + ").";
+        if (res.status === 404) detail = "Máy chủ chưa hỗ trợ chức năng này (lỗi 404).";
         throw new Error(detail);
       }
       render(body);
+      $("stat-latency").textContent = Math.round(performance.now() - started) + " ms";
     } catch (err) {
       showError(err instanceof TypeError
-        ? "Không kết nối được máy chủ. Hãy chạy backend (uvicorn backend.main:app) rồi mở lại trang."
+        ? "Không kết nối được máy chủ. Hãy chạy backend rồi mở lại trang."
         : err.message);
     } finally {
       setLoading(false);

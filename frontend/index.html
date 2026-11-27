@@ -2,86 +2,133 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nhận diện phương tiện ưu tiên</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nhận diện phương tiện ưu tiên | ITS Group 9</title>
+  <meta name="description" content="Nhận diện phương tiện ưu tiên: xe cứu thương, xe cứu hỏa, xe công an.">
+  <meta name="color-scheme" content="dark">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%91%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="header">
-    <div class="container">
-      <h1>Nhận diện phương tiện ưu tiên</h1>
-      <p>Tải ảnh hoặc video để hệ thống tìm xe cứu thương, xe cứu hỏa, xe công an. Nhóm 9 - môn Hệ thống Giao thông Thông minh.</p>
+  <a class="skip-link" href="#main">Bỏ qua đến nội dung chính</a>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <div>
+          <p class="brand__kicker">ITS Group 9 · Control Room</p>
+          <h1 class="brand__title">Nhận diện phương tiện ưu tiên</h1>
+        </div>
+      </div>
+      <div class="clock" aria-label="Thời gian hiện tại">
+        <time id="clock" class="clock__time">--:--:--</time>
+        <span id="clock-date" class="clock__date">--/--/----</span>
+      </div>
     </div>
+    <div class="hazard-band" aria-hidden="true"></div>
   </header>
 
-  <main class="container layout">
-    <!-- Cột trái: chọn file -->
-    <section class="card" aria-labelledby="upload-title">
-      <h2 id="upload-title">1. Chọn ảnh hoặc video</h2>
+  <main id="main" class="dashboard">
 
-      <label id="drop-area" class="drop" for="file-input">
-        <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.avi,.mov,.mkv,.webm" hidden>
-        <div id="drop-empty" class="drop__empty">
-          <strong>Kéo thả file vào đây hoặc bấm để chọn</strong>
-          <span>Ảnh JPG, PNG, WEBP (tối đa 10 MB) hoặc video MP4, AVI, MOV, MKV, WEBM (tối đa 50 MB)</span>
-        </div>
-        <div id="preview" class="preview" hidden></div>
-      </label>
+    <!-- ===== Cột trái: màn hình + điều khiển ===== -->
+    <div class="workspace">
+      <section class="stage" aria-label="Màn hình nhận diện">
+        <div class="stage__tag"><span class="dot" aria-hidden="true"></span>Nguồn: <span id="stage-source">Chưa có</span></div>
+        <button id="btn-original" class="stage__toggle" type="button" hidden>Xem ảnh gốc</button>
+        <i class="corner corner--tl" aria-hidden="true"></i>
+        <i class="corner corner--tr" aria-hidden="true"></i>
+        <i class="corner corner--bl" aria-hidden="true"></i>
+        <i class="corner corner--br" aria-hidden="true"></i>
 
-      <p id="file-info" class="file-info" hidden></p>
-      <p id="file-error" class="error" role="alert" hidden></p>
+        <!-- Vùng chọn / kéo thả file và xem trước -->
+        <label id="drop-area" class="drop" for="file-input">
+          <input id="file-input" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime,video/x-matroska,video/x-msvideo,.mp4,.avi,.mov,.mkv,.webm">
+          <div id="drop-empty" class="drop__empty">
+            <strong>Kéo thả file vào đây hoặc bấm để chọn</strong>
+            <span>Ảnh JPG, PNG, WEBP (tối đa 10 MB) hoặc video MP4, AVI, MOV, MKV, WEBM (tối đa 50 MB)</span>
+          </div>
+          <div id="preview" class="preview" hidden></div>
+        </label>
 
-      <div class="actions">
-        <button id="btn-detect" class="btn btn--primary" type="button" disabled>Nhận diện</button>
-        <button id="btn-clear" class="btn" type="button" disabled>Xóa</button>
-      </div>
-    </section>
-
-    <!-- Cột phải: kết quả -->
-    <section class="card" aria-labelledby="result-title" aria-live="polite">
-      <h2 id="result-title">2. Kết quả</h2>
-
-      <div id="result-empty" class="placeholder">Chưa có kết quả. Hãy chọn file rồi bấm "Nhận diện".</div>
-      <div id="result-loading" class="loading" hidden><span class="spinner"></span><span id="loading-text">Đang phân tích...</span></div>
-      <p id="result-error" class="error" role="alert" hidden></p>
-
-      <div id="result" hidden>
-        <div id="banner" class="banner"></div>
-        <p id="result-message" class="message"></p>
-
-        <dl class="facts">
-          <div><dt>Loại xe chính</dt><dd id="r-type">-</dd></div>
-          <div><dt id="r-score-label">Độ tin cậy</dt><dd id="r-score">-</dd></div>
-          <div id="r-video-row" hidden><dt>Khung hình đã phân tích</dt><dd id="r-video">-</dd></div>
-        </dl>
-
-        <div id="timeline-box" hidden>
-          <h3>Dòng thời gian của video</h3>
-          <div id="timeline" class="timeline"></div>
-          <p class="legend"><span class="dot dot--red"></span> có xe ưu tiên <span class="dot dot--gray"></span> không thấy xe ưu tiên</p>
-        </div>
-
+        <!-- Ảnh đã đánh dấu khung đỏ: phủ lên màn hình sau khi nhận diện -->
         <figure id="annotated-box" class="annotated" hidden>
           <img id="annotated" alt="Ảnh đã đánh dấu phương tiện">
           <figcaption id="annotated-caption">Khung đỏ: xe ưu tiên do mô hình phát hiện.</figcaption>
         </figure>
+      </section>
 
-        <div id="det-box" hidden>
-          <h3>Các xe ưu tiên tìm thấy</h3>
-          <ul id="det-list" class="det-list"></ul>
-        </div>
+      <p id="file-info" class="file-info" hidden></p>
+      <p id="file-error" class="form-error" role="alert" hidden></p>
+
+      <div class="toolbar" role="group" aria-label="Điều khiển">
+        <label for="file-input" class="btn btn--primary">Chọn ảnh / video</label>
+        <button id="btn-detect" class="btn btn--go" type="button" disabled>Nhận diện</button>
+        <button id="btn-clear" class="btn btn--stop" type="button" disabled>Xóa</button>
       </div>
-    </section>
 
-    <section class="note card--wide">
-      <strong>Cách hệ thống hoạt động:</strong> mô hình YOLOv8n do nhóm tự huấn luyện trên bộ ảnh xe cứu thương, cứu hỏa, công an,
-      cho ra vị trí, loại xe và độ tin cậy. Mô hình chỉ biết 3 loại xe ưu tiên này.
-    </section>
+      <div class="statusbar" aria-label="Thông số hệ thống">
+        <span>Xử lý: <b id="stat-latency">– ms</b></span>
+        <span>Đối tượng: <b id="stat-objects">0</b></span>
+        <span>Cảnh báo: <b id="stat-alerts">0</b></span>
+        <span>Nguồn: <b id="stat-source">Chưa có</b></span>
+      </div>
+    </div>
+
+    <!-- ===== Cột phải: trạng thái, thông tin, lịch sử ===== -->
+    <aside class="sidebar" aria-label="Kết quả nhận diện">
+
+      <section class="card">
+        <h2 class="card__title">Trạng thái hệ thống</h2>
+        <div id="banner" class="banner banner--idle" role="status" aria-live="polite">Sẵn sàng</div>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Thông tin nhận diện</h2>
+
+        <p id="result-empty" class="note">Chưa có kết quả. Hãy chọn file rồi bấm “Nhận diện”.</p>
+        <div id="result-loading" class="loading" hidden><span class="spinner" aria-hidden="true"></span><span id="loading-text">Đang phân tích...</span></div>
+        <p id="result-error" class="form-error" role="alert" hidden></p>
+
+        <div id="result" hidden>
+          <p id="result-message" class="message"></p>
+
+          <dl class="facts">
+            <div><dt>Loại xe chính</dt><dd id="r-type">-</dd></div>
+            <div><dt id="r-score-label">Độ tin cậy</dt><dd id="r-score">-</dd></div>
+            <div id="r-video-row" hidden><dt>Khung hình đã phân tích</dt><dd id="r-video">-</dd></div>
+          </dl>
+
+          <div id="timeline-box" hidden>
+            <h3 class="sub-title">Dòng thời gian của video</h3>
+            <div id="timeline" class="timeline"></div>
+            <p class="legend"><span class="dot dot--red"></span> có xe ưu tiên <span class="dot dot--gray"></span> không thấy xe ưu tiên</p>
+          </div>
+
+          <div id="det-box" hidden>
+            <h3 class="sub-title">Các xe tìm thấy</h3>
+            <ul id="det-list" class="det-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card--grow">
+        <h2 class="card__title">Lịch sử cảnh báo</h2>
+        <ul id="history-list" class="history">
+          <li class="history__empty">Chưa có cảnh báo nào.</li>
+        </ul>
+      </section>
+    </aside>
   </main>
 
-  <footer class="footer container">Dự án demo cho tiểu luận môn Hệ thống Giao thông Thông minh - Nhóm 9</footer>
+  <footer class="site-footer">
+    <p>Dự án demo cho tiểu luận môn Hệ thống Giao thông Thông minh · Giảng viên hướng dẫn: Vũ Đình Long</p>
+  </footer>
 
-  <script src="js/app.js"></script>
+  <script src="js/clock.js" defer></script>
+  <script src="js/app.js" defer></script>
 </body>
 </html>
