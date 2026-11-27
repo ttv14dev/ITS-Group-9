@@ -1,0 +1,15 @@
+names:
+- Ambulance
+- Fire truck
+- Police car
+nc: 3
+path: /content/dataset
+roboflow:
+  license: CC BY 4.0
+  project: ambulance-fire-police
+  url: https://universe.roboflow.com/jaa-ifc6q/ambulance-fire-police/dataset/5
+  version: 5
+  workspace: jaa-ifc6q
+test: test/images
+train: train/images
+val: valid/images
