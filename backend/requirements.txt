@@ -2,7 +2,9 @@ fastapi
 uvicorn[standard]
 python-multipart
 pillow
+numpy
+# Dung OpenCV 4.8 tro len de doc file ONNX cua YOLOv8 (chua kiem tra voi ban 5.x)
+opencv-python-headless>=4.8,<5
+# Chi can de chay test
 pytest
 httpx
-# Chỉ cần nếu dùng backend/app/ml/vehicle_detector.py (YOLO):
-# ultralytics
